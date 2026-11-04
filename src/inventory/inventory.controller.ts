@@ -18,4 +18,8 @@ export class InventoryController {
         return this.inventoryServ.add_quantity(data.quantity , data.product_id);
     }
 
+    @GrpcMethod('InventoryService' , 'CheckAmount')
+    checkAmount (data : {product_id : Array<string> , amount : Array<number>}){
+        return this.inventoryServ.check_amount(data.product_id , data.amount)
+    }
   }
