@@ -1,0 +1,48 @@
+services:
+  inventory:
+    build: .
+    ports:
+      - "50051:50051"
+    env_file:
+      - ./.env
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASS: ""
+      DB_NAME: storage
+      GRPC_SERVER_URL: 0.0.0.0:50051
+      
+      TSC_WATCHFILE: PriorityPollingInterval
+      TSC_WATCHDIRECTORY: RecursiveDirectoryUsingDynamicPriorityPolling
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - default
+      - shared_network
+  mysql:
+    image: mariadb:10.4
+    restart: always
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: storage
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
+networks:
+  shared_network:
+    external: true
+volumes:
+  mysql-data:
+
